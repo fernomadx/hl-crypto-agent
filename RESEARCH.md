@@ -48,3 +48,11 @@ teto na perda.
 Day trade tem >90% de prejuízo (FGV/CVM). Isto aqui é estudo + automação paper,
 não garantia de lucro. Repos do próprio autor (Crypto-Monitor: monitor +
 scorecard com 10x, sem lucro validado publicado) reforçam o quadro.
+
+## Nova missão (30/10, pós 04:52): funding carry cross-sectional
+Réplica própria estilo Keel (short 2 fundings mais ricos / long 2 mais baratos,
+rebalance diário, 10 perps, 1x, taker 0,045%): **90 dias → -29,76%**
+(36 wins / 52 losses, taxas $7,92, funding líquido só +$1,04, maxDD 32,6%).
+Funding recebido não cobre a deriva dos preços das pernas. Janela do Keel
+(08/2024–09/2026, +49,2% líquido) é outro regime/construção — não replicado aqui.
+Próximas frentes: grid/MM open-source, momentum long-only com filtro BTC.
