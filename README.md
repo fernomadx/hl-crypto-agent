@@ -33,3 +33,10 @@ Sem stop a perda média fica ilimitada e uma cauda limpa a conta de $100. O stop
 4. Live começa com 0.5% de risco, nunca alavancagem > 2x
 
 Aviso: day trade tem >90% de prejuízo (FGV/CVM). Isso aqui é estudo + automação paper, não garantia de lucro.
+
+## Regra de venue (correção 30/10)
+Preço que vale para stops, alvos e entradas do paper é SEMPRE o da Hyperliquid,
+a venue operada. Nunca substituir por spot de outra venue (ex.: Coinbase): em
+30/10 a Coinbase marcou 77293 enquanto a Hyperlink imprimiu wick a 78094 e
+stopou o SHORT — venue errada = decisão errada. O bot trava sem decidir se o
+dado da Hyperliquid estiver defasado (fail closed).

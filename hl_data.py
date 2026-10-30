@@ -1,7 +1,12 @@
-"""Public market data from Hyperliquid (no auth needed). Stdlib only."""
+"""Public market data from Hyperliquid (no auth needed). Stdlib only.
+
+VENUE RULE (2026-10-30, correção do Fernando): stops, alvos e entradas do paper
+valem SOMENTE com preço da Hyperliquid, a venue operada. Nunca substituir por
+spot de outra venue (ex.: Coinbase)."""
 import json, time, urllib.request
 
-API = 'https://api.hyperliquid.xyz/info'
+VENUE = 'hyperliquid'
+API = 'https://api.hyperliquid.xyz/info'  # única fonte; não trocar por outra venue
 
 def post(payload, timeout=30):
     req = urllib.request.Request(API, data=json.dumps(payload).encode(),

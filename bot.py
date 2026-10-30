@@ -5,7 +5,7 @@ no private key is ever loaded; live orders are not implemented.
 """
 import json, sys, os, time, datetime as dt
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from hl_data import candles
+from hl_data import candles, VENUE
 from strategy import signals
 
 BASE = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +27,9 @@ def log(msg):
 def once(coin='BTC', equity=100.0):
     st = load_state()
     data = candles(coin, '15m', 3)
+    if data and (time.time()*1000 - data[-1]['t']) > 30*60*1000:
+        log(f'{coin}: dados defasados na {VENUE}, sem decisão (fail closed)')
+        return
     if len(data) < 60:
         log(f'{coin}: sem dados suficientes ({len(data)})'); return
     ind = signals(data)
