@@ -11,7 +11,8 @@ from strategy import signals
 BASE = os.path.dirname(os.path.abspath(__file__))
 STATE = os.path.join(BASE, 'state.json')
 LOG = os.path.join(BASE, 'paper.log')
-ATR_MULT, RR, RISK = 2.0, 2.0, 0.01
+ATR_MULT, RR = 2.0, 2.0
+MARGIN_FRAC, LEV = 0.05, 20  # 5% do capital a 20x (paper)
 MIN_NOTIONAL = 10.0  # Hyperliquid protocol minimum
 
 def load_state():
@@ -54,17 +55,18 @@ def once(coin='BTC', equity=100.0):
     if (long_ok or short_ok):
         side = 1 if long_ok else -1
         stop_d = ATR_MULT * ind['atr'][i]
-        risk_amt = eq * RISK
-        notional = max(MIN_NOTIONAL, min(risk_amt / (stop_d / px), eq))
+        margin = eq * MARGIN_FRAC
+        notional = max(MIN_NOTIONAL, margin * LEV)
+        risk_amt = notional * (stop_d / px)
         st[key] = {'side': side, 'entry': px, 'stop': round(px - side * stop_d, 2),
                    'tp': round(px + side * stop_d * RR, 2), 'notional': round(notional, 2),
                    'risk_amt': round(risk_amt, 2), 'at': data[i]['t']}
         json.dump(st, open(STATE, 'w'))
-        log(f"{coin}: PAPER ENTRY {'LONG' if side>0 else 'SHORT'} px={px} stop={st[key]['stop']} tp={st[key]['tp']} notional={st[key]['notional']} rsi={round(ind['rsi'][i],1)}")
+        log(f"{coin}: PAPER ENTRY {'LONG' if side>0 else 'SHORT'} px={px} stop={st[key]['stop']} tp={st[key]['tp']} notional={st[key]['notional']} lev={LEV}x margem={round(margin,2)} liq~4.5%contra rsi={round(ind['rsi'][i],1)}")
     else:
         log(f"{coin}: sem sinal px={px} ema50={round(ind['e50'][i],1)} rsi={round(ind['rsi'][i] or -1,1)}")
 
 if __name__ == '__main__':
     coin = sys.argv[sys.argv.index('--coin')+1] if '--coin' in sys.argv else 'BTC'
-    eq = float(sys.argv[sys.argv.index('--equity')+1]) if '--equity' in sys.argv else 100.0
+    eq = float(sys.argv[sys.argv.index('--equity')+1]) if '--equity' in sys.argv else 1000.0
     once(coin, eq)
