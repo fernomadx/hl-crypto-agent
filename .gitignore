@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+state.json
+paper.log
+*.json
+!btc15m*.json
+!eth15m*.json
