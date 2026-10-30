@@ -56,3 +56,10 @@ rebalance diário, 10 perps, 1x, taker 0,045%): **90 dias → -29,76%**
 Funding recebido não cobre a deriva dos preços das pernas. Janela do Keel
 (08/2024–09/2026, +49,2% líquido) é outro regime/construção — não replicado aqui.
 Próximas frentes: grid/MM open-source, momentum long-only com filtro BTC.
+
+## Varredura 1000 estratégias (30/10, dados diários 2 anos, base 1000)
+`grid_backtest.py` + `results_grid.csv` + `GRID_SUMMARY.md`: 1000 combinações
+(10 moedas × 100 parametrizações em 12 famílias), líquido de fees.
+262 lucrativas, 65 robustas (≥10 trades, PF>1) — concentradas na HYPE
+(subiu 3-4x no período: regime, não edge provado). Maiores retornos com 2-3
+trades = sorte amostral. Tudo in-sample; falta walk-forward. Nada live.
