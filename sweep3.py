@@ -10,12 +10,35 @@ API=G.API; FEE=0.00045+0.0002
 UNI=['BTC','ETH','SOL']; SPLIT=0.75
 
 def nz(x): return x is not None
+def fetch(coin,start,end,retries=8):
+    import random
+    out,cur,blank=[],start,0
+    while cur<end:
+        nxt=min(cur+365*24*3600*1000,end)
+        try:
+            b=G.post({'type':'candleSnapshot','req':{'coin':coin,'interval':'1d','startTime':cur,'endTime':nxt}})
+        except Exception:
+            b=[]
+        if not b:
+            blank+=1
+            if blank<=retries:
+                time.sleep(10+random.random()*5); continue
+            break
+        blank=0; out.extend(b); cur=b[-1]['T']+1
+        if len(b)<2: break
+        time.sleep(1)
+    seen,clean=set(),[]
+    for c in out:
+        if c['t'] not in seen:
+            seen.add(c['t']); clean.append({k:(float(c[k]) if k in 'ohlcv' else c[k]) for k in ('t','o','h','l','c','v')})
+    clean.sort(key=lambda c:c['t']); return clean
 def load(coin,path,days=800):
-    import os
-    if os.path.exists(path):
-        d=json.load(open(path)); print(coin,'cache',len(d),flush=True); return d
+    import os as _os
+    if _os.path.exists(path):
+        d=json.load(open(path))
+        if len(d)>200: print(coin,'cache',len(d),flush=True); return d
     end=int(time.time()*1000); start=end-days*24*3600*1000
-    d=G.candles(coin,'1d',start,end)
+    d=fetch(coin,start,end)
     json.dump(d,open(path,'w')); print(coin,'download',len(d),flush=True); return d
 
 def obv(c,v):
