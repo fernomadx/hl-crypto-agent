@@ -69,7 +69,44 @@ def once(coin='BTC', equity=100.0):
     else:
         log(f"{coin}: sem sinal px={px} ema50={round(ind['e50'][i],1)} rsi={round(ind['rsi'][i] or -1,1)}")
 
+
+def status():
+    """Posições SOMENTE com preço fresco da venue (Hyperliquid), com timestamp.
+    REGRA (2026-10-31, correção do Fernando): nenhum número de posição sai
+    daqui sem leitura ao vivo na venue; dado antigo nunca é relatado como atual.
+    Se a venue estiver inacessível, diz isso em vez de número."""
+    from hl_data import mids
+    st = load_state()
+    try:
+        px = mids()
+    except Exception as e:
+        log(f'status: venue {VENUE} inacessivel agora, sem numero ({e})')
+        return
+    now = dt.datetime.now(dt.timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')
+    flat = {}
+    def collect(d):
+        for k, v in (d or {}).items():
+            if isinstance(v, dict) and 'entry' in v and 'side' in v:
+                flat[k] = v
+            elif isinstance(v, dict):
+                collect(v)
+    collect(st)
+    parts = []
+    for coin, pos in flat.items():
+        cur = px.get(coin)
+        if cur is None:
+            parts.append(f'{coin}: sem preco na venue agora'); continue
+        cur = float(cur)
+        chg = (cur - pos['entry']) / pos['entry'] * pos['side']
+        parts.append(f"{coin} {'LONG' if pos['side'] > 0 else 'SHORT'} entry={pos['entry']} px={round(cur, 6) if cur < 10 else round(cur, 2)} {chg*100:+.2f}%")
+    eq = st.get('equity')
+    extra = f' caixa={eq}' if eq is not None else ''
+    log(f'status {now} venue={VENUE}{extra} | ' + (' | '.join(parts) if parts else 'sem posicoes'))
+
 if __name__ == '__main__':
-    coin = sys.argv[sys.argv.index('--coin')+1] if '--coin' in sys.argv else 'BTC'
-    eq = float(sys.argv[sys.argv.index('--equity')+1]) if '--equity' in sys.argv else 1000.0
-    once(coin, eq)
+    if '--status' in sys.argv:
+        status()
+    else:
+        coin = sys.argv[sys.argv.index('--coin')+1] if '--coin' in sys.argv else 'BTC'
+        eq = float(sys.argv[sys.argv.index('--equity')+1]) if '--equity' in sys.argv else 1000.0
+        once(coin, eq)
